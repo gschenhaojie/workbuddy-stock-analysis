@@ -86,6 +86,7 @@ npx skills add https://github.com/gschenhaojie/workbuddy-stock-analysis
 stock-analysis-workflow/
 ├── LICENSE                              # CC BY-NC 4.0 许可
 ├── README.md                           # 本说明
+├── 分享指南.md                          # 转发话术 + 安装提示词 + 版本内容说明（发给别人安装用）
 ├── stock-analysis/                     # 技能①：股票多维评估 v1.1.0
 │   ├── SKILL.md                        #   框架 + 触发词 + 评级配色 + 持仓问询 + 核对清单 + 交付纪律
 │   └── references/
