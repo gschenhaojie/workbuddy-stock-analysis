@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>002045 国光电器 股票多维评估报告 v1.1.0</title>
+<style>
+  :root{
+    --accent:#b45309; --accent-soft:#fef3e2;
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --up:#d92020; --down:#16a34a; --warn:#d97706;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;max-width:1180px;margin:0 auto;gap:28px;padding:32px 20px 80px}
+  .toc{position:sticky;top:24px;align-self:flex-start;width:220px;flex:0 0 220px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow)}
+  .toc h4{margin:0 0 10px;font-size:13px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .toc a{display:block;color:var(--ink);text-decoration:none;font-size:14px;padding:7px 10px;border-radius:8px;transition:.15s}
+  .toc a:hover,.toc a.active{background:var(--accent-soft);color:var(--accent)}
+  .main{flex:1;min-width:0}
+  .hero{background:linear-gradient(135deg,#b45309,#e0951a);color:#fff;border-radius:18px;padding:30px 32px;box-shadow:var(--shadow);margin-bottom:24px}
+  .hero .tag{display:inline-block;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:999px;font-size:13px;margin-bottom:12px}
+  .hero h1{margin:0 0 6px;font-size:28px;font-weight:700}
+  .hero .sub{opacity:.9;font-size:14px}
+  .hero .rate{margin-top:18px;display:inline-block;background:#fff;color:#b45309;font-weight:700;padding:8px 16px;border-radius:999px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .meta span{background:rgba(255,255,255,.15);padding:5px 12px;border-radius:8px;font-size:13px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:20px;box-shadow:var(--shadow)}
+  h2{font-size:20px;margin:0 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:22px 0 10px;color:var(--accent)}
+  p{margin:10px 0}
+  .lead{font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:14px 0}
+  .metric{background:var(--accent-soft);border-radius:12px;padding:14px}
+  .metric .k{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .metric .v{font-size:20px;font-weight:700}
+  .up{color:var(--up)} .down{color:var(--down)} .neu{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:#f8fafc;color:var(--muted);font-weight:600;font-size:13px}
+  tr:hover td{background:#fafbff}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .pill.g{background:#e7f7ee;color:var(--down)} .pill.r{background:#fdeaea;color:var(--up)} .pill.n{background:var(--accent-soft);color:var(--accent)} .pill.w{background:#fef3e2;color:var(--warn)}
+  .rangebar{position:relative;height:42px;background:linear-gradient(90deg,#16a34a1f,#d920201f);border:1px solid var(--line);border-radius:10px;margin:52px 0 30px}
+  .rangebar .rl{position:absolute;top:0;bottom:0;width:3px;background:var(--muted);transform:translateX(-50%)}
+  .rangebar .rl.low{background:#16a34a} .rangebar .rl.sup{background:#1d4ed8} .rangebar .rl.cost{background:#b45309} .rangebar .rl.res{background:#b91c1c} .rangebar .rl.high{background:#b91c1c}
+  .rangebar .rl-l{position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:11px;line-height:1.2;white-space:nowrap;color:var(--muted);background:var(--bg);padding:1px 4px;border-radius:4px}
+  .rangebar .rl-l.t2{top:-39px}
+  .rangebar .rl-l.first{left:0;transform:none}
+  .rangebar .rl-l.last{left:auto;right:0;transform:none}
+  .rangebar .rl-l b{color:var(--ink)}
+  .rangebar .dot{position:absolute;top:-7px;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translateX(-50%)}
+  .range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+  .zone{background:var(--accent-soft);border-left:4px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;margin:8px 0}
+  .scn{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0}
+  .scn .c{border:1px solid var(--line);border-radius:12px;padding:16px}
+  .scn .c h4{margin:0 0 8px;font-size:15px}
+  .scn .c .p{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .rec{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:14px 0}
+  .rec .r{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fffaf2}
+  .rec .r .t{font-weight:700;margin-bottom:8px;color:var(--accent)}
+  .rec .r ul{margin:6px 0 0;padding-left:18px} .rec .r li{margin:5px 0;font-size:14px}
+  .score{margin:8px 0 4px}
+  .score .row{display:flex;align-items:center;gap:12px;margin:10px 0}
+  .score .lbl{width:90px;font-size:14px}
+  .score .bar{flex:1;height:10px;background:#eef0f4;border-radius:999px;overflow:hidden}
+  .score .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+  .score .num{width:54px;text-align:right;font-weight:700;font-size:14px}
+  .risk{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:700;background:#fef3e2;color:var(--warn)}
+  .note{background:#fff8ec;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;font-size:14px;margin:12px 0}
+  .box{background:#f8fafc;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:14px;margin:12px 0}
+  .obs li{margin:8px 0}
+  .disc{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:8px}
+  .rl-legend{display:none;flex-wrap:wrap;gap:8px 16px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+  .rl-legend .it{display:inline-flex;align-items:center;gap:6px}
+  .rl-legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+  @media (max-width:860px){.wrap{flex-direction:column}.toc{position:static;width:100%;flex:none}.rangebar .rl-l{font-size:10px;padding:0 3px}}
+  @media (max-width:560px){.rangebar .rl-l{display:none}.rl-legend{display:flex}}
+  @media print{body{background:#fff}.toc,.hero{box-shadow:none}section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc">
+    <h4>目录</h4>
+    <a href="#c1">一、一句话结论</a>
+    <a href="#c2">二、财务角度评估</a>
+    <a href="#c3">三、红旗联动筛查</a>
+    <a href="#c4">四、市场情绪评估</a>
+    <a href="#c5">五、下阶段方向</a>
+    <a href="#c6">六、操盘建议</a>
+    <a href="#c7">七、综合评级</a>
+    <a href="#c8">八、持仓与止盈止损</a>
+    <a href="#c9">九、关键观察点</a>
+  </nav>
+
+  <div class="main">
+    <div class="hero">
+      <span class="tag">A股 002045 · 消费电子 / 音响电声</span>
+      <h1>国光电器（002045.SZ）股票多维评估</h1>
+      <div class="sub">行业：电子 / 消费电子　|　分析框架：stock-analysis v1.1.0（财务+情绪+情景+短中长线，联动 corp-investigation 红旗库）</div>
+      <div class="meta">
+        <span>数据截至：2026-10-13 收盘</span>
+        <span>现价：8.85 元 <span class="up">（+1.37%）</span></span>
+        <span>总市值：≈ 49.8 亿</span>
+        <span>PB 1.20x</span>
+        <span>年初至今 ≈ -40%</span>
+        <span>持仓状态：未持仓·准备建仓</span>
+      </div>
+      <div class="rate">综合评级：中性偏谨慎（持有 / 观望）</div>
+    </div>
+
+    <section id="c1">
+      <h2>一、一句话结论</h2>
+      <p class="lead">国光电器当前处于 <b>"低估值 + 基本面恶化 + 治理瑕疵"三重叠加</b> 状态。账面上"便宜"——PB 1.20x 逼近破净、PS 0.68x 低、经营现金流仍为正、控股股东<b>质押率 ≈ 0%</b>（无爆仓风险）；但盈利质量显著恶化：2026H1 由盈转亏（归母 <span class="down">-7575万</span>、同比 <span class="down">-217.71%</span>）、毛利率连续下滑，且 <b>触发两盏 corp-investigation 红旗</b>——2026-05 广东证监局行政监管措施 + 深交所通报批评（信息披露违规）、以及连续由盈转亏的业绩变脸。本份按 v1.1.0 新工作流产出，新增<b>颜色条全览</b>与<b>第八节建仓策略</b>（因用户"未持仓·准备建仓"走建仓分支）。</p>
+      <div class="note"><b>与沃尔核材对比</b>：沃尔核材是"估值杀透、基本面未破、零质押"的左侧坑；国光电器是"估值低但盈利恶化 + 治理处分"的审慎观察对象，二者风险性质不同，不可套用同一抄底逻辑。</div>
+    </section>
+
+    <section id="c2">
+      <h2>二、财务角度评估（价值锚）</h2>
+      <div class="grid">
+        <div class="metric"><div class="k">2026H1 营收</div><div class="v down">32.72亿</div><div class="k">同比 -15.64%</div></div>
+        <div class="metric"><div class="k">2026H1 归母净利</div><div class="v down">-7575万</div><div class="k">同比 -217.71%（由盈转亏）</div></div>
+        <div class="metric"><div class="k">毛利率</div><div class="v down">11.70%</div><div class="k">同比 -1.46pct（Q2 仅 10.23%）</div></div>
+        <div class="metric"><div class="k">经营现金流</div><div class="v up">1.29亿</div><div class="k">同比 -31.17%（仍为正）</div></div>
+        <div class="metric"><div class="k">资产负债率</div><div class="v down">61.81%</div><div class="k">+4.03pct（偏高上行）</div></div>
+        <div class="metric"><div class="k">PB（MRQ）</div><div class="v neu">1.20x</div><div class="k">逼近破净</div></div>
+      </div>
+      <h3>核心判断</h3>
+      <p><b>盈利质量</b>：虽扣非亏损，但经营现金流仍为正（+1.29 亿），折旧摊销与营运资本尚能覆盖，非纯粹纸面亏损；投资活动净流出 -8.31 亿（江西/越南基地扩产），自由现金流承压。</p>
+      <p><b>连续变脸轨迹</b>：净利 2024 +2.53 亿 → 2025 <span class="down">-1.13 亿</span>（首亏）→ 2026H1 <span class="down">-7575 万</span>；单季 2026Q1 -2574 万、Q2 -5001 万，亏损逐季扩大。归因：剥离国光国贸致收入基数降、客户出货节奏调整、芯片/磁钢/锂盐等原材料涨价、汇兑损失；正面为销管研费用同比降约 1 亿。</p>
+      <p><b>估值水位</b>：PB 1.20x 逼近净资产、PS 0.68x 低；现价 8.85 处于 52 周区间 <b>约 18% 分位（近底部）</b>；PE(TTM) 因亏损无意义。低估值提供边际安全垫，但盈利持续恶化时估值底可能继续下移（价值陷阱风险）。</p>
+      <h3>分业务（H1，按收入结构）</h3>
+      <p>音箱及扬声器 <b>77.47%</b>（音响电声主业）、电池 7.13%（锂电池/国光电子）、电子零配件 6.90%。战略重点：AI 眼镜、AI 耳机整机组装导入 + 自建光学实验室；江西、越南基地投产应对贸易环境变化。概念贴合 AI 音箱/智能音箱/AI眼镜/固态电池/苹果/百度/ChatGPT 等。</p>
+    </section>
+
+    <section id="c3">
+      <h2>三、🚩 corp-investigation 红旗联动筛查</h2>
+      <p>针对"实控人掏空 / 财务造假 / 治理隐患"方向，套用企业关联穿透调查红旗库（六盏）：</p>
+      <table>
+        <thead><tr><th>红旗信号</th><th>国光电器状态</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>高质押 / 冻结（>70%）</td><td>第一大股东深圳智度国光投资（11.22%）及一致行动人（智度科技 9.57% 等）质押/冻结均"不适用"＝<b>质押率≈0%</b></td><td><span class="pill g">未触发（无爆仓风险）</span></td></tr>
+          <tr><td>存贷双高</td><td>资产负债率 61.81%（偏高上行），但未查明细是否存在"高货币资金+高有息负债"并存</td><td><span class="pill w">需关注</span></td></tr>
+          <tr><td>关联交易异常输送</td><td>2026 年度日常关联交易预计已正常审议披露，未提示异常</td><td><span class="pill g">未触发</span></td></tr>
+          <tr><td>审计非标意见</td><td>半年报未提及审计非标</td><td><span class="pill g">未触发</span></td></tr>
+          <tr><td>监管问询 / 立案</td><td><b>2026-05-22 深交所通报批评 + 2026-05-23 广东证监局行政监管措施决定书</b>；违规含"信息披露虚假或严重误导性陈述、未及时披露公司重大事项"；处罚对象含公司及时任董事长陆宏达、时任总裁何伟成、时任财务总监兼董秘肖庆、董秘王婕</td><td><span class="pill r">触发（治理瑕疵）</span></td></tr>
+          <tr><td>业绩变脸</td><td>2024 +2.53 亿 → 2025 -1.13 亿 → 2026H1 -7575 万，连续由盈转亏</td><td><span class="pill r">触发</span></td></tr>
+        </tbody>
+      </table>
+      <div class="box">结论：国光电器<b>并非"掏空型"问题股</b>（无高质押抽血），但存在 <b>信息披露合规瑕疵 + 盈利持续恶化</b> 的双重红旗。监管处分虽非财务造假立案，但反映公司治理与信披质量短板，会压制机构配置意愿与估值溢价。建议列为"观察但审慎"标的，而非"困境反转"抄底对象。</div>
+    </section>
+
+    <section id="c4">
+      <h2>四、市场情绪评估（价格动能）+ 颜色条全览</h2>
+      <h3>价格区间颜色条全览</h3>
+      <!-- 颜色条：细线=关键价位，圆点=当前价。端点 low/high 用 first/last 防裁切；low·sup 与 res·cost 两对相近价位分别错开 t2 双层，避免标签重合 -->
+      <div class="rangebar">
+        <div class="rl low"  style="left:0%"><span class="rl-l first">52周低 <b>7.20</b></span></div>
+        <div class="rl sup"  style="left:3.3%"><span class="rl-l t2">支撑 <b>7.50</b></span></div>
+        <div class="rl res"  style="left:15%"><span class="rl-l">压力 <b>8.54</b></span></div>
+        <div class="rl cost" style="left:19%"><span class="rl-l t2">筹码成本 <b>8.93</b></span></div>
+        <div class="rl high" style="left:100%"><span class="rl-l last">52周高 <b>16.37</b></span></div>
+        <div class="dot" style="left:18%"></div>
+      </div>
+      <div class="range-labels"><span>低位区</span><span>中位区</span><span>高位区</span></div>
+      <div class="rl-legend">
+        <span class="it"><i class="sw" style="background:#16a34a"></i>52周低 7.20</span>
+        <span class="it"><i class="sw" style="background:#1d4ed8"></i>支撑 7.50</span>
+        <span class="it"><i class="sw" style="background:#b91c1c"></i>压力 8.54</span>
+        <span class="it"><i class="sw" style="background:#b45309"></i>筹码成本 8.93</span>
+        <span class="it"><i class="sw" style="background:#b91c1c"></i>52周高 16.37</span>
+      </div>
+      <p class="zone">当前价 <b>8.85</b> 处于 52 周 <b>18%</b> 分位，位于【<b>低位区</b>】——接近 52 周底部，下行空间有限但趋势未反转；现价略低于筹码成本线 8.93（上方套牢盘待消化），上方面临 8.54 压力位。</p>
+      <ul>
+        <li><b>技术形态</b>：年初至今约 <span class="down">-40%</span>，距 1 月高点回撤约 46%；现价处于 52 周 <b>18% 分位（近底部）</b>；筹码平均成本 8.93 元（当前价略低于成本线），<b>压力位 8.54 元下方</b>震荡，上方套牢盘需放量消化。</li>
+        <li><b>资金流向</b>：近 20 日主力净流出 <span class="down">约 -7898 万</span>；融资余额约 2.5–3.2 亿（占流通 5.19%，历史低位）；<b>北向逆势增持</b>至 966.72 万股（1.72%，第五大流通股东，较 Q1 的 459 万股明显增持）；股东户数 6.91 万（<span class="up">-11.10%</span>，筹码趋集中）。</li>
+        <li><b>估值分位</b>：PB 1.20x、PS 0.68x，处于破净边缘的低估值区。</li>
+        <li><b>舆情 / 板块</b>：概念贴合 AI 音箱/AI眼镜/固态电池/苹果/智能穿戴等；但所属智能音箱板块 YTD -4.66%、固态电池 -1.50%，苹果概念 +10.16% 跑赢；公司自身显著跑输。</li>
+        <li><b>机构评级</b>：近 3 月仅 2 位分析师覆盖（强力推荐 50% + 买入 50%），<b>暂无目标价</b>；中邮证券早期"买入"预测与 2025 实际亏损背离、参考价值有限；另有第三方深度报告"持有"、目标价 9.24 元。机构覆盖稀薄、预期未收敛。</li>
+      </ul>
+      <div class="note"><b>情绪小结</b>：信号分化——北向逆势增持 + 筹码集中（偏多）vs 主力净流出 + 融资低位 + 上方套牢盘（偏空）。低估值提供边际安全垫，但做多情绪尚未形成共振，缺乏一致预期支撑。</div>
+    </section>
+
+    <section id="c5">
+      <h2>五、下阶段方向（催化剂 / 风险 / 情景）</h2>
+      <h3>催化剂（向上）</h3>
+      <p>①三季报（10-28）亏损显著收窄或单季转正，验证降本增效；②AI 眼镜/AI 硬件订单批量落地、江西/越南基地放量摊薄成本；③原材料（芯片/磁钢/锂盐）价格回落 + 人民币企稳，汇兑由损转益；④北向持续增持带动估值修复。</p>
+      <h3>风险事件（向下）</h3>
+      <p>①亏损扩大或持续、毛利率进一步被原材料/汇率侵蚀；②资产负债率突破 65%、自由现金流转负，扩产反成负担；③监管违规后续引发更严厉措施或投资者诉讼；④破净后继续下行，考验 7.20 元前低。</p>
+      <div class="scn">
+        <div class="c"><h4>乐观 · 25%</h4><div class="p">三季报扭亏 + AI硬件放量 + 北向增持</div><div class="v up" style="font-size:18px;font-weight:700">目标 11 元（PB≈1.5x）</div></div>
+        <div class="c"><h4>中性 · 50%</h4><div class="p">全年小幅亏损，7.5–9.5 箱体磨底等拐点</div><div class="v neu" style="font-size:18px;font-weight:700">区间 7.5–9.5 元</div></div>
+        <div class="c"><h4>悲观 · 25%</h4><div class="p">亏损扩大 + 负债上行 + 破前低</div><div class="v down" style="font-size:18px;font-weight:700">目标 6.5–7.2 元</div></div>
+      </div>
+    </section>
+
+    <section id="c6">
+      <h2>六、操盘建议</h2>
+      <div class="rec">
+        <div class="r"><div class="t">短线（1–4 周）</div>
+          <ul>
+            <li><b>中性观望为主</b>；上方 8.93 成本线 + 8.54 压力位压制，反弹缺量能</li>
+            <li>若放量站稳 9.0 元且北向续增持 → 轻仓试多</li>
+            <li>破 <b>7.20 前低</b> 则止损离场</li>
+            <li>不建议赌 10-28 三季报反转</li>
+          </ul>
+        </div>
+        <div class="r"><div class="t">中线（1–3 季）</div>
+          <ul>
+            <li>主逻辑＝<b>基本面拐点确认</b>：三季报亏损收窄、毛利率回 13%+、AI订单转化</li>
+            <li>7.5–9.5 区间可分批低吸（PB 1.2x 安全边际），单笔 ≤ 组合 5%，严格止损</li>
+            <li>回避监管处分情绪发酵期（利空出尽前）重仓</li>
+          </ul>
+        </div>
+        <div class="r"><div class="t">长线（1 年+）</div>
+          <ul>
+            <li>看产能兑现（江西/越南满产）+ 盈利修复，估值从破净边缘修复至 1.5x PB</li>
+            <li>若 2027 如期扭亏（卖方中性预期）→ 转持有</li>
+            <li>证伪信号＝连续两年亏损触及 ST 风险 → 坚决回避</li>
+            <li>承受"低分红 0.17% + 治理瑕疵"机会成本</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="c7">
+      <h2>七、综合评级与评分</h2>
+      <div class="score">
+        <div class="row"><div class="lbl">财务面</div><div class="bar"><i style="width:45%"></i></div><div class="num">45/100</div></div>
+        <div class="row"><div class="lbl">情绪面</div><div class="bar"><i style="width:50%"></i></div><div class="num">50/100</div></div>
+        <div class="row"><div class="lbl">情景面</div><div class="bar"><i style="width:55%"></i></div><div class="num">55/100</div></div>
+      </div>
+      <p><b>综合评级</b>：<span class="pill n">中性偏谨慎（持有 / 观望）</span> · 综合分 ≈ 50/100</p>
+      <p><b>风险等级</b>：<span class="risk">中高</span> —— 盈利恶化 + 监管处分 + 破净边缘，价值陷阱风险高于沃尔核材。</p>
+      <div class="note"><b>便宜但有"伤"</b>：低估值提供安全垫，但盈利恶化 + 监管处分构成双刹。纪律上以"等拐点、控仓位、设止损"为主，不宜在拐点确认前盲目抄底。</div>
+    </section>
+
+    <section id="c8">
+      <h2>八、持仓状态与止盈止损价位</h2>
+      <p><b>持仓分支</b>：用户选择「未持仓·准备建仓」，进入<b>建仓策略分支</b>（非已持仓的止盈止损分支）。以下为建仓区间、触发条件、初始仓位上限与观望条件。</p>
+      <div class="box">
+        <p><b>建仓区间</b>：首仓 <b>7.80–9.00 元</b>（当前 8.85 已在区间内，可小仓试探）；若回调至 <b>7.20–7.80 元</b> 再加仓；<b>跌破 7.20 前低则放弃并观望</b>。</p>
+        <p><b>建仓触发条件</b>：①放量站稳 9.0 元且北向继续增持；②10-28 三季报亏损收窄 / 单季转正信号。</p>
+        <p><b>初始仓位上限</b>：单笔 ≤ 组合 <b>5%</b>（风险等级中高、破净边缘谨慎），总建仓仓位建议 ≤ 组合 <b>12%</b>，严格分 2–3 批投入。</p>
+        <p><b>观望条件</b>：监管处分情绪发酵期（利空出尽前）、Q3 仍扩大亏损、跌破 7.20 前低、或大盘系统性下行。</p>
+      </div>
+    </section>
+
+    <section id="c9">
+      <h2>九、关键观察点（盯盘清单）</h2>
+      <ol class="obs">
+        <li><b>2026 Q3 财报（10-28 披露）</b>：是否亏损收窄或单季转正（最核心证伪/证实点）。</li>
+        <li><b>毛利率</b>：能否从 11.70% 回到 13%+（原材料/汇率改善的试金石）。</li>
+        <li><b>股价 7.20 前低</b>：跌破则破净+趋势确认恶化，触发止损/放弃建仓。</li>
+        <li><b>北向持仓 / 股东户数</b>：北向是否持续增持、户数是否继续下降（资金回流信号）。</li>
+        <li><b>监管处分后续</b>：是否引发更严厉措施或投资者诉讼（治理风险观察窗）。</li>
+      </ol>
+      <p class="disc">本报告基于公开信息（2026 半年报/业绩预告、交易所监管函、东方财富/同花顺/腾讯财经/富途行情、公开研报）与分析模型生成，含【事实】与【推测】两类内容，推测部分不构成投资建议。所有价格为 2026-10-13 收盘数据，实时行情可能已变化。<b>据此操作风险自担；报告仅用于研究与风控，不构成任何买卖要约、招揽或法律意见，不得用于造谣、市场操纵或传播未公开信息。</b></p>
+    </section>
+  </div>
+</div>
+<script>
+  const links=[...document.querySelectorAll('.toc a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const id='#'+e.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')===id))}})},{rootMargin:'-20% 0px -70% 0px'});
+  secs.forEach(s=>s&&obs.observe(s));
+</script>
+</body>
+</html>

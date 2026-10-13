@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{CODE}} {{NAME}} 股票多维评估报告</title>
+<!--
+  ============================================================
+  评级驱动配色：复制对应一档整段 :root 到下方即可（价格涨跌仍用 --up 红 / --down 绿，与评级正交）
+  ------------------------------------------------------------
+  ★ 积极配置（高分·低风险） ★
+  :root{--accent:#1d4ed8;--accent-soft:#e8effd;--bg:#f5f7fa;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--up:#d92020;--down:#16a34a;--warn:#d97706;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)}
+  hero background: linear-gradient(135deg,#1d4ed8,#3b6fe0)
+
+  ★ 中性 ★
+  :root{--accent:#0f766e;--accent-soft:#e6f4f1;--bg:#f5f7fa;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--up:#d92020;--down:#16a34a;--warn:#d97706;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)}
+  hero background: linear-gradient(135deg,#0f766e,#1f9c8c)
+
+  ★ 中性偏谨慎（中低分） ★
+  :root{--accent:#b45309;--accent-soft:#fef3e2;--bg:#f5f7fa;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--up:#d92020;--down:#16a34a;--warn:#d97706;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)}
+  hero background: linear-gradient(135deg,#b45309,#e0951a)
+
+  ★ 回避（低分·高风险） ★
+  :root{--accent:#b91c1c;--accent-soft:#fdeaea;--bg:#f5f7fa;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--up:#d92020;--down:#16a34a;--warn:#d97706;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)}
+  hero background: linear-gradient(135deg,#b91c1c,#e04b4b)
+  ============================================================
+-->
+<style>
+  :root{
+    /* ★ 按综合评级复制顶部对应整段 :root 替换本块；默认=中性偏谨慎 ★ */
+    --accent:#b45309; --accent-soft:#fef3e2;
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --up:#d92020; --down:#16a34a; --warn:#d97706;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;max-width:1180px;margin:0 auto;gap:28px;padding:32px 20px 80px}
+  .toc{position:sticky;top:24px;align-self:flex-start;width:220px;flex:0 0 220px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow)}
+  .toc h4{margin:0 0 10px;font-size:13px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .toc a{display:block;color:var(--ink);text-decoration:none;font-size:14px;padding:7px 10px;border-radius:8px;transition:.15s}
+  .toc a:hover,.toc a.active{background:var(--accent-soft);color:var(--accent)}
+  .main{flex:1;min-width:0}
+  .hero{background:linear-gradient(135deg,#b45309,#e0951a);color:#fff;border-radius:18px;padding:30px 32px;box-shadow:var(--shadow);margin-bottom:24px}
+  .hero .tag{display:inline-block;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:999px;font-size:13px;margin-bottom:12px}
+  .hero h1{margin:0 0 6px;font-size:28px;font-weight:700}
+  .hero .sub{opacity:.9;font-size:14px}
+  .hero .rate{margin-top:18px;display:inline-block;background:#fff;color:#b45309;font-weight:700;padding:8px 16px;border-radius:999px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .meta span{background:rgba(255,255,255,.15);padding:5px 12px;border-radius:8px;font-size:13px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:20px;box-shadow:var(--shadow)}
+  h2{font-size:20px;margin:0 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:22px 0 10px;color:var(--accent)}
+  p{margin:10px 0}
+  .lead{font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:14px 0}
+  .metric{background:var(--accent-soft);border-radius:12px;padding:14px}
+  .metric .k{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .metric .v{font-size:20px;font-weight:700}
+  .up{color:var(--up)} .down{color:var(--down)} .neu{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:#f8fafc;color:var(--muted);font-weight:600;font-size:13px}
+  tr:hover td{background:#fafbff}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .pill.g{background:#e7f7ee;color:var(--down)} .pill.r{background:#fdeaea;color:var(--up)} .pill.n{background:var(--accent-soft);color:var(--accent)} .pill.w{background:#fef3e2;color:var(--warn)}
+  /* 颜色条全览：细线标关键价位 + 圆点标当前价 + 区域说明 */
+  .rangebar{position:relative;height:42px;background:linear-gradient(90deg,#16a34a1f,#d920201f);border:1px solid var(--line);border-radius:10px;margin:52px 0 30px}
+  .rangebar .rl{position:absolute;top:0;bottom:0;width:3px;background:var(--muted);transform:translateX(-50%)}
+  .rangebar .rl.low{background:#16a34a} .rangebar .rl.sup{background:#1d4ed8} .rangebar .rl.cost{background:#b45309} .rangebar .rl.res{background:#b91c1c} .rangebar .rl.high{background:#b91c1c}
+  .rangebar .rl-l{position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:11px;line-height:1.2;white-space:nowrap;color:var(--muted);background:var(--bg);padding:1px 4px;border-radius:4px}
+  .rangebar .rl-l.t2{top:-39px}
+  .rangebar .rl-l.first{left:0;transform:none}
+  .rangebar .rl-l.last{left:auto;right:0;transform:none}
+  .rangebar .rl-l b{color:var(--ink)}
+  .rangebar .dot{position:absolute;top:-7px;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translateX(-50%)}
+  .range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+  .zone{background:var(--accent-soft);border-left:4px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;margin:8px 0}
+  .scn{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0}
+  .scn .c{border:1px solid var(--line);border-radius:12px;padding:16px}
+  .scn .c h4{margin:0 0 8px;font-size:15px}
+  .scn .c .p{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .rec{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:14px 0}
+  .rec .r{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fffaf2}
+  .rec .r .t{font-weight:700;margin-bottom:8px;color:var(--accent)}
+  .rec .r ul{margin:6px 0 0;padding-left:18px} .rec .r li{margin:5px 0;font-size:14px}
+  .score{margin:8px 0 4px}
+  .score .row{display:flex;align-items:center;gap:12px;margin:10px 0}
+  .score .lbl{width:90px;font-size:14px}
+  .score .bar{flex:1;height:10px;background:#eef0f4;border-radius:999px;overflow:hidden}
+  .score .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+  .score .num{width:54px;text-align:right;font-weight:700;font-size:14px}
+  .risk{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:700;background:#fef3e2;color:var(--warn)}
+  .note{background:#fff8ec;border-left:4px solid var(--warn);padding:12px 16px;border-radius:8px;font-size:14px;margin:12px 0}
+  .box{background:#f8fafc;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:14px;margin:12px 0}
+  .tp{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0}
+  .tp .t{background:var(--accent-soft);border-radius:12px;padding:16px}
+  .tp .t h4{margin:0 0 6px;font-size:15px;color:var(--accent)}
+  .tp .t .px{font-size:24px;font-weight:700;margin:4px 0}
+  .tp .t .rs{font-size:13px;color:var(--muted)}
+  .obs li{margin:8px 0}
+  .disc{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:8px}
+  .rl-legend{display:none;flex-wrap:wrap;gap:8px 16px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+  .rl-legend .it{display:inline-flex;align-items:center;gap:6px}
+  .rl-legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+  @media (max-width:860px){.wrap{flex-direction:column}.toc{position:static;width:100%;flex:none}.rangebar .rl-l{font-size:10px;padding:0 3px}}
+  @media (max-width:560px){.rangebar .rl-l{display:none}.rl-legend{display:flex}}
+  @media print{body{background:#fff}.toc,.hero{box-shadow:none}section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc">
+    <h4>目录</h4>
+    <a href="#c1">一、一句话结论</a>
+    <a href="#c2">二、财务角度评估</a>
+    <a href="#c3">三、红旗联动筛查</a>
+    <a href="#c4">四、市场情绪评估</a>
+    <a href="#c5">五、下阶段方向</a>
+    <a href="#c6">六、操盘建议</a>
+    <a href="#c7">七、综合评级</a>
+    <a href="#c8">八、持仓与止盈止损</a>
+    <a href="#c9">九、关键观察点</a>
+  </nav>
+
+  <div class="main">
+    <div class="hero">
+      <span class="tag">A股 {{CODE}} · {{INDUSTRY}}</span>
+      <h1>{{NAME}}（{{CODE}}.SZ）股票多维评估</h1>
+      <div class="sub">行业：{{INDUSTRY}}　|　分析框架：stock-analysis 标准框架（财务+情绪+情景+短中长线，联动 corp-investigation 红旗库）</div>
+      <div class="meta">
+        <span>数据截至：{{DATE}} 收盘</span>
+        <span>现价：{{PRICE}} 元 <span class="{{DIR}}">（{{PCT}}）</span></span>
+        <span>总市值：{{MKT_CAP}}</span>
+        <span>PB {{PB}}x</span>
+        <span>年初至今 {{YTD}}</span>
+        <span>持仓状态：{{POSITION_STATE}}</span>
+      </div>
+      <div class="rate">综合评级：{{RATING}}</div>
+    </div>
+
+    <section id="c1">
+      <h2>一、一句话结论</h2>
+      <p class="lead">{{CONCLUSION}}</p>
+    </section>
+
+    <section id="c2">
+      <h2>二、财务角度评估（价值锚）</h2>
+      <div class="grid">
+        <div class="metric"><div class="k">{{M1_LABEL}}</div><div class="v">{{M1_VAL}}</div><div class="k">{{M1_SUB}}</div></div>
+        <div class="metric"><div class="k">{{M2_LABEL}}</div><div class="v">{{M2_VAL}}</div><div class="k">{{M2_SUB}}</div></div>
+        <div class="metric"><div class="k">{{M3_LABEL}}</div><div class="v">{{M3_VAL}}</div><div class="k">{{M3_SUB}}</div></div>
+        <div class="metric"><div class="k">{{M4_LABEL}}</div><div class="v">{{M4_VAL}}</div><div class="k">{{M4_SUB}}</div></div>
+        <div class="metric"><div class="k">{{M5_LABEL}}</div><div class="v">{{M5_VAL}}</div><div class="k">{{M5_SUB}}</div></div>
+        <div class="metric"><div class="k">{{M6_LABEL}}</div><div class="v">{{M6_VAL}}</div><div class="k">{{M6_SUB}}</div></div>
+      </div>
+      <h3>核心判断</h3>
+      <p>{{FIN_CORE}}</p>
+      <h3>分业务</h3>
+      <p>{{BUSINESS}}</p>
+    </section>
+
+    <section id="c3">
+      <h2>三、🚩 corp-investigation 红旗联动筛查</h2>
+      <p>{{RED_FLAG_INTRO}}</p>
+      <table>
+        <thead><tr><th>红旗信号</th><th>状态</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>高质押 / 冻结（>70%）</td><td>{{RF1}}</td><td>{{RF1_VERDICT}}</td></tr>
+          <tr><td>存贷双高</td><td>{{RF2}}</td><td>{{RF2_VERDICT}}</td></tr>
+          <tr><td>关联交易异常输送</td><td>{{RF3}}</td><td>{{RF3_VERDICT}}</td></tr>
+          <tr><td>审计非标意见</td><td>{{RF4}}</td><td>{{RF4_VERDICT}}</td></tr>
+          <tr><td>监管问询 / 立案</td><td>{{RF5}}</td><td>{{RF5_VERDICT}}</td></tr>
+          <tr><td>业绩变脸</td><td>{{RF6}}</td><td>{{RF6_VERDICT}}</td></tr>
+        </tbody>
+      </table>
+      <div class="box">{{RED_FLAG_BOX}}</div>
+    </section>
+
+    <section id="c4">
+      <h2>四、市场情绪评估（价格动能）+ 颜色条全览</h2>
+      <h3>价格区间颜色条全览</h3>
+      <!-- 颜色条：细线=关键价位，圆点=当前价。端点 low/high 用 first/last 防裁切；low·sup 与 res·cost 两对相近价位分别错开 t2 双层，避免标签重合（如某票价位更密，可继续对贴近的两线交替加 t2） -->
+      <div class="rangebar">
+        <div class="rl low"  style="left:0%"><span class="rl-l first">52周低 <b>{{LOW}}</b></span></div>
+        <div class="rl sup"  style="left:{{SUP_PCT}}%"><span class="rl-l t2">支撑 <b>{{SUP}}</b></span></div>
+        <div class="rl res"  style="left:{{RES_PCT}}%"><span class="rl-l">压力 <b>{{RES}}</b></span></div>
+        <div class="rl cost" style="left:{{COST_PCT}}%"><span class="rl-l t2">筹码成本 <b>{{COST_LINE}}</b></span></div>
+        <div class="rl high" style="left:100%"><span class="rl-l last">52周高 <b>{{HIGH}}</b></span></div>
+        <div class="dot" style="left:{{POS_PCT}}%"></div>
+      </div>
+      <div class="range-labels"><span>低位区</span><span>中位区</span><span>高位区</span></div>
+      <div class="rl-legend">
+        <span class="it"><i class="sw" style="background:#16a34a"></i>52周低 {{LOW}}</span>
+        <span class="it"><i class="sw" style="background:#1d4ed8"></i>支撑 {{SUP}}</span>
+        <span class="it"><i class="sw" style="background:#b91c1c"></i>压力 {{RES}}</span>
+        <span class="it"><i class="sw" style="background:#b45309"></i>筹码成本 {{COST_LINE}}</span>
+        <span class="it"><i class="sw" style="background:#b91c1c"></i>52周高 {{HIGH}}</span>
+      </div>
+      <p class="zone">当前价 <b>{{PRICE}}</b> 处于 52 周 <b>{{POS_PCT}}%</b> 分位，位于【<b>{{ZONE_LABEL}}</b>】——{{ZONE_NOTE}}。</p>
+      <ul>
+        <li><b>技术形态</b>：{{TECH}}</li>
+        <li><b>资金流向</b>：{{FLOW}}</li>
+        <li><b>估值分位</b>：{{VAL_PCT}}</li>
+        <li><b>舆情 / 板块</b>：{{SENTIMENT}}</li>
+        <li><b>机构评级</b>：{{INST}}</li>
+      </ul>
+      <div class="note"><b>情绪小结</b>：{{MOOD_SUMMARY}}</div>
+    </section>
+
+    <section id="c5">
+      <h2>五、下阶段方向（催化剂 / 风险 / 情景）</h2>
+      <h3>催化剂（向上）</h3>
+      <p>{{CATALYST}}</p>
+      <h3>风险事件（向下）</h3>
+      <p>{{RISK_EVENT}}</p>
+      <div class="scn">
+        <div class="c"><h4>乐观 · {{P_UP}}%</h4><div class="p">{{S_UP}}</div><div class="v up" style="font-size:18px;font-weight:700">{{T_UP}}</div></div>
+        <div class="c"><h4>中性 · {{P_MID}}%</h4><div class="p">{{S_MID}}</div><div class="v neu" style="font-size:18px;font-weight:700">{{T_MID}}</div></div>
+        <div class="c"><h4>悲观 · {{P_DOWN}}%</h4><div class="p">{{S_DOWN}}</div><div class="v down" style="font-size:18px;font-weight:700">{{T_DOWN}}</div></div>
+      </div>
+    </section>
+
+    <section id="c6">
+      <h2>六、操盘建议</h2>
+      <div class="rec">
+        <div class="r"><div class="t">短线（1–4 周）</div><ul>{{REC_SHORT}}</ul></div>
+        <div class="r"><div class="t">中线（1–3 季）</div><ul>{{REC_MID}}</ul></div>
+        <div class="r"><div class="t">长线（1 年+）</div><ul>{{REC_LONG}}</ul></div>
+      </div>
+    </section>
+
+    <section id="c7">
+      <h2>七、综合评级与评分</h2>
+      <div class="score">
+        <div class="row"><div class="lbl">财务面</div><div class="bar"><i style="width:{{S_FIN}}%"></i></div><div class="num">{{N_FIN}}/100</div></div>
+        <div class="row"><div class="lbl">情绪面</div><div class="bar"><i style="width:{{S_MOOD}}%"></i></div><div class="num">{{N_MOOD}}/100</div></div>
+        <div class="row"><div class="lbl">情景面</div><div class="bar"><i style="width:{{S_SCEN}}%"></i></div><div class="num">{{N_SCEN}}/100</div></div>
+      </div>
+      <p><b>综合评级</b>：<span class="pill n">{{RATING}}</span> · 综合分 ≈ {{S_TOTAL}}/100</p>
+      <p><b>风险等级</b>：<span class="risk">{{RISK_LEVEL}}</span></p>
+      <div class="note">{{RATING_NOTE}}</div>
+    </section>
+
+    <section id="c8">
+      <h2>八、持仓状态与止盈止损价位</h2>
+      <p>{{POSITION_BRANCH_INTRO}}</p>
+      <!-- 已持仓分支：填 HOLD_* 并删除 BUILD 块 -->
+      <div class="tp">
+        <div class="t"><h4>止损价</h4><div class="px down">{{HOLD_STOP_PX}}</div><div class="rs">{{HOLD_STOP_LOGIC}}</div></div>
+        <div class="t"><h4>止盈价（第一批）</h4><div class="px up">{{HOLD_TP1_PX}}</div><div class="rs">{{HOLD_TP1_LOGIC}}</div></div>
+        <div class="t"><h4>止盈价（第二批）</h4><div class="px up">{{HOLD_TP2_PX}}</div><div class="rs">{{HOLD_TP2_LOGIC}}</div></div>
+      </div>
+      <p><b>持仓动作</b>：{{HOLD_ACTION}}（触发条件：{{HOLD_ACTION_TRIGGER}}）</p>
+      <p>{{HOLD_UNDERWATER}}（若已浮亏的解套/降本方案）</p>
+      <!-- 未持仓分支：填 BUILD_* 并删除 HOLD 块 -->
+      <div class="box">{{BUILD_CONTENT}}</div>
+    </section>
+
+    <section id="c9">
+      <h2>九、关键观察点（盯盘清单）</h2>
+      <ol class="obs">{{WATCHLIST}}</ol>
+      <p class="disc">{{DISCLAIMER}}</p>
+    </section>
+  </div>
+</div>
+<script>
+  const links=[...document.querySelectorAll('.toc a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const id='#'+e.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')===id))}})},{rootMargin:'-20% 0px -70% 0px'});
+  secs.forEach(s=>s&&obs.observe(s));
+</script>
+</body>
+</html>
